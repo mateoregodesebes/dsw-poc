@@ -36,7 +36,9 @@
         })
     }
     ws.onmessage = (msg) => {
-        const message = `<li>${msg.data}</li>`
-        messages.insertAdjacentHTML('beforeend', message)
+        msg.data.text().then((text) => {
+            const message = `<li>${text}</li>`
+            messages.insertAdjacentHTML('beforeend', message)
+        })
     }
 </script>
