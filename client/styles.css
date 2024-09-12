@@ -13,8 +13,11 @@ body {
     display: grid;
     place-content: center;
     height: 100vh;
-    padding: 36px;
+    padding: 36px 36px 100px 36px;
     grid-template-rows: 1fr;
+}
+
+#messages {
 }
 
 #chat {
@@ -24,4 +27,36 @@ body {
     width: 350px;
     height: 100%;
     position: relative;
+}
+
+#form {
+    bottom: 0;
+    display: flex;
+    height: 48px;
+    left: 0;
+    padding: 4px;
+    position: absolute;
+    right: 0;
+}
+
+#input {
+    border-radius: 9999px;
+    border: 1px solid #cccc;
+    flex: 1;
+    margin: 4px;
+    padding: 0 8px;
+}
+#input:focus {
+    outline: 0;
+}
+#form > button {
+    background-color: #0070f3;
+    border: 0;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin: 4px;
+}
+#form > button:hover {
+    background-color: #85b9f5;
 }

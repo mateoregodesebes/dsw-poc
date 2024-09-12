@@ -9,10 +9,34 @@
     </head>
     <body>
         <section id="chat">
-            <form>
-                <input type="text" id="message" placeholder="Escribir un mensaje" />
+            <ul id="messages"></ul>
+            <form id="form">
+                <input id="input" type="text" id="message" placeholder="Escribir un mensaje" />
                 <button type="submit">Enviar</button>
             </form>
         </section>
     </body>
 </html>
+
+<script>
+    const ws = new WebSocket('ws://localhost:3000')
+
+    const form = document.getElementById('form')
+    const input = document.getElementById('input')
+    const messages = document.getElementById('messages')
+
+    ws.onopen = () => {
+        console.log('Conectado al servidor')
+        form.addEventListener('submit', (e) => {
+            e.preventDefault()
+            if (input.value) {
+                ws.send(input.value)
+                input.value = ''
+            }
+        })
+    }
+    ws.onmessage = (msg) => {
+        const message = `<li>${msg.data}</li>`
+        messages.insertAdjacentHTML('beforeend', message)
+    }
+</script>
