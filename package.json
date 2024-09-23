@@ -12,8 +12,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "express": "4.19.2",
+        "express": "^4.21.0",
         "morgan": "1.10.0",
+        "mqtt": "^5.10.1",
         "ws": "8.18.0"
     }
 }

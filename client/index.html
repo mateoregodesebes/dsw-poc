@@ -10,6 +10,7 @@
     <body>
         <section id="chat">
             <ul id="messages"></ul>
+            <div id="notification">🔔</div> <!-- Campanita de notificación -->
             <form id="form">
                 <input id="input" type="text" id="message" placeholder="Escribir un mensaje" />
                 <button type="submit">Enviar</button>
@@ -24,6 +25,7 @@
     const form = document.getElementById('form')
     const input = document.getElementById('input')
     const messages = document.getElementById('messages')
+    const notification = document.getElementById('notification')
 
     ws.onopen = () => {
         console.log('Conectado al servidor')
@@ -39,6 +41,14 @@
         msg.data.text().then((text) => {
             const message = `<li>${text}</li>`
             messages.insertAdjacentHTML('beforeend', message)
+            showNotification()
         })
+     function showNotification() {
+                notification.style.display = 'block'
+                setTimeout(() => {
+                    notification.style.display = 'none'
+                }, 3000) // Mostrar por 3 segundos
+
+            }
     }
 </script>
