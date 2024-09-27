@@ -5,45 +5,22 @@
         <title>PoC Chat</title>
         <base href="/" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="styles.css" />
-	
-		
+
 		<script type="module">
 			import { io } from 'https://cdn.socket.io/4.3.2/socket.io.esm.min.js'
 		
-			const getUsername = async () => {
-			  const username = localStorage.getItem('username')
-			  if (username) {
-				console.log(`User existed ${username}`)
-				return username
-			  }
-		
-			  const res = await fetch('https://random-data-api.com/api/users/random_user')
-			  const { username: randomUsername } = await res.json()
-		
-			  localStorage.setItem('username', randomUsername)
-			  return randomUsername
-			}
-		
-			const socket = io({
-			  auth: {
-				username: await getUsername(),
-				serverOffset: 0
-			  }
-			})
+			const socket = io()
 		
 			const form = document.getElementById('form')
 			const input = document.getElementById('input')
 			const messages = document.getElementById('messages')
 		
-			socket.on('chat message', (msg, serverOffset, username) => {
+			socket.on('chat message', (msg, serverOffset) => {
 			  const item = `<li>
 				<p>${msg}</p>
-				<small>${username}</small>
 			  </li>`
 			  messages.insertAdjacentHTML('beforeend', item)
-			  socket.auth.serverOffset = serverOffset
-			  // scroll to bottom of messages
+			  // scroll to bottom
 			  messages.scrollTop = messages.scrollHeight
 			})
 		
@@ -56,8 +33,6 @@
 			  }
 			})
 		  </script>	
-
-
 <style>
     *,
     *::before,
@@ -140,7 +115,7 @@
       background: #0cf;
     }
   </style>
-  
+
     </head>
     <body>
 			<section id="chat">

@@ -27,7 +27,7 @@ io.on('connection', async (socket) => {
 app.use(logger('dev'))
 
 app.get('/', (req, res) => {
-    res.sendFile(process.cwd() + '/browser_side/index.html')
+    res.sendFile(process.cwd() + '/client/index.html')
 })
 
 app.use(express.static(process.cwd() + '/browser_side'))
