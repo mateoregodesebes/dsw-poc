@@ -6,6 +6,7 @@
         <base href="/" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="styles.css" />
+        <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     </head>
     <body>
         <section id="chat">
@@ -37,18 +38,26 @@
             }
         })
     }
+
     ws.onmessage = (msg) => {
         msg.data.text().then((text) => {
             const message = `<li>${text}</li>`
             messages.insertAdjacentHTML('beforeend', message)
-            showNotification()
+            
         })
+    
      function showNotification() {
                 notification.style.display = 'block'
                 setTimeout(() => {
                     notification.style.display = 'none'
                 }, 3000) // Mostrar por 3 segundos
-
             }
+
+        mqttClient.on('message', (topic, message) => {
+            console.log(`Mensaje MQTT recibido: ${message.toString()}`)
+            showNotification() 
+            })
     }
 </script>
+
+
