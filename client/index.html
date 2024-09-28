@@ -6,12 +6,12 @@
         <base href="/" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="styles.css" />
-        <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     </head>
     <body>
         <section id="chat">
             <ul id="messages"></ul>
-            <div id="notification">🔔</div> <!-- Campanita de notificación -->
+            <div id="notification">🔔</div>
+            <!-- Campanita de notificación -->
             <form id="form">
                 <input id="input" type="text" id="message" placeholder="Escribir un mensaje" />
                 <button type="submit">Enviar</button>
@@ -19,8 +19,10 @@
         </section>
     </body>
 </html>
-
+<script src="https://unpkg.com/mqtt/dist/mqtt.js"></script>
 <script>
+    const mqttClient = mqtt.connect('mqtt://test.mosquitto.org', { port: 8080 })
+
     const ws = new WebSocket('ws://localhost:3000')
 
     const form = document.getElementById('form')
@@ -34,6 +36,7 @@
             e.preventDefault()
             if (input.value) {
                 ws.send(input.value)
+                mqttClient.publish('chat/notifications', input.value)
                 input.value = ''
             }
         })
@@ -43,21 +46,27 @@
         msg.data.text().then((text) => {
             const message = `<li>${text}</li>`
             messages.insertAdjacentHTML('beforeend', message)
-            
         })
-    
-     function showNotification() {
-                notification.style.display = 'block'
-                setTimeout(() => {
-                    notification.style.display = 'none'
-                }, 3000) // Mostrar por 3 segundos
-            }
+    }
 
-        mqttClient.on('message', (topic, message) => {
-            console.log(`Mensaje MQTT recibido: ${message.toString()}`)
-            showNotification() 
-            })
+    mqttClient.on('connect', () => {
+        mqttClient.subscribe('chat/notifications', (err) => {
+            if (!err) {
+                console.log('Suscrito al topic chat/notifications')
+            } else {
+                console.error('Error al suscribirse al topic:', err)
+            }
+        })
+    })
+
+    mqttClient.on('message', (topic, message) => {
+        showNotification()
+    })
+
+    function showNotification() {
+        notification.style.display = 'block'
+        setTimeout(() => {
+            notification.style.display = 'none'
+        }, 3000) // Mostrar por 3 segundos
     }
 </script>
-
-
