@@ -3,139 +3,167 @@
     <head>
         <meta charset="UTF-8" />
         <title>PoC Chat</title>
-        <base href="/" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-		<script type="module">
+		<base href="/" />
+        <link rel="stylesheet" href="styles.css"/>
+<script src="https://unpkg.com/mqtt/dist/mqtt.js"></script>
+<script type="module">
 			import { io } from 'https://cdn.socket.io/4.3.2/socket.io.esm.min.js'
 		
 			const socket = io()
 		
+      const mqttClient = mqtt.connect('mqtt://test.mosquitto.org', { port: 8080 })
+
 			const form = document.getElementById('form')
 			const input = document.getElementById('input')
 			const messages = document.getElementById('messages')
+    	const notification = document.getElementById('notification')
 		
 			socket.on('chat message', (msg, serverOffset) => {
 			  const item = `<li>
 				<p>${msg}</p>
 			  </li>`
 			  messages.insertAdjacentHTML('beforeend', item)
-			  // scroll to bottom
 			  messages.scrollTop = messages.scrollHeight
 			})
 		
 			form.addEventListener('submit', (e) => {
 			  e.preventDefault()
-		
 			  if (input.value) {
-				socket.emit('chat message', input.value)
-				input.value = ''
+				  socket.emit('chat message', input.value)
+				  mqttClient.publish('chat/notifications', input.value)
+				  input.value = ''
 			  }
 			})
-		  </script>	
+
+      // mqtt
+      mqttClient.on('connect', () => {
+        mqttClient.subscribe('chat/notifications', (err) => {
+            if (!err) {
+                console.log('Suscrito al topic chat/notifications')
+            } else {
+                console.error('Error al suscribirse al topic:', err)
+            }
+        })
+      })
+
+      mqttClient.on('message', (topic, message) => {
+        showNotification()
+        console.log('AAAAAAAA')
+      })
+
+      function showNotification() {
+        notification.style.display = 'block'
+        setTimeout(() => {
+            notification.style.display = 'none'
+        }, 3000) // Mostrar por 3 segundos
+      }
+    
+</script>
+
 <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-    :root {
-      color-scheme: light dark;
-    }
+:root {
+  color-scheme: light dark;
+}
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      display: grid;
-      place-content: center;
-      height: 100vh;
-      padding: 36px 36px 100px 36px;
-      grid-template-rows: 1fr;
-    }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  display: grid;
+  place-content: center;
+  height: 100vh;
+  padding: 36px 36px 100px 36px;
+  grid-template-rows: 1fr;
+}
 
-    #messages {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      overflow-y: scroll;
-      height: 100%;
-      scroll-behavior: smooth;
-      padding-bottom: 48px;
-    }
+#notification {
+    display: none;
+    font-size: 24px;
+    color: red;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
 
-    #messages>li {
-      padding: .5rem 1rem;
-    }
+#messages {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: scroll;
+  height: 100%;
+  scroll-behavior: smooth;
+  padding-bottom: 48px;
+}
 
-    #messages>li:nth-child(odd) {
-      background: #000;
-    }
+#messages>li {
+  padding: .5rem 1rem;
+}
 
-    #chat {
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      overflow: hidden;
-      width: 350px;
-      height: 100%;
-      position: relative;
-    }
+#messages>li:nth-child(odd) {
+  background: #000;
+}
 
-    #form {
-      bottom: 0;
-      display: flex;
-      height: 48px;
-      left: 0;
-      padding: 4px;
-      position: absolute;
-      right: 0;
-    }
+#chat {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 350px;
+  height: 100%;
+  position: relative;
+}
 
-    #input {
-      border-radius: 9999px;
-      border: 1px solid #eee;
-      flex: 1;
-      margin: 4px;
-      padding: 0 8px;
-    }
+#form {
+  bottom: 0;
+  display: flex;
+  height: 48px;
+  left: 0;
+  padding: 4px;
+  position: absolute;
+  right: 0;
+}
 
-    #input:focus {
-      outline: 0;
-    }
+#input {
+  border-radius: 9999px;
+  border: 1px solid #eee;
+  flex: 1;
+  margin: 4px;
+  padding: 0 8px;
+}
 
-    #form>button {
-      background: #09f;
-      color: #fff;
-      border: 0;
-      margin: 4px;
-      border-radius: 4px;
-    }
+#input:focus {
+  outline: 0;
+}
 
-    #form>button:hover {
-      background: #0cf;
-    }
-  </style>
+#form>button {
+  background: #09f;
+  color: #fff;
+  border: 0;
+  margin: 4px;
+  border-radius: 4px;
+}
 
-    </head>
-    <body>
-			<section id="chat">
-				<ul id="messages"></ul>
-				<form id="form">
-
-				  <input type="text" name="message" id="input" placeholder="Type a message" autocomplete="off" />
-				  <button type="submit">Enviar</button>
-
-
-				</form>
-        </section>
-    </body>
+#form>button:hover {
+  background: #0cf;
+}
+	</style>
+</head>
+<body>
+	<section id="chat">
+		<ul id="messages"></ul>
+    <div id="notification">🔔</div>
+		<form id="form">
+			<input type="text" name="message" id="input" placeholder="Type a message" autocomplete="off" />
+			<button type="submit">Enviar</button>
+		</form>
+    </section>
+</body>
 </html>
-
-
-
-
-
-
 
 
 
